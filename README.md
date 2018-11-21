@@ -50,7 +50,7 @@ app(initialState, View, document.getElementById('app'));
 > initialState is just a plain js object.  
 > View is just a plain React functional component
 
-# Get and Update State
+# Get and Update State (Basics)
 
 `getState()` gets global state and `updateState()` updates it...
 
@@ -75,62 +75,6 @@ export const Home = () => {
 
 # Making the above pure and testable
 
-In order to make the above pure and testable, we optionally allow state to be injected. By default state is set to `getState()`...
-
-```javascript
-
-import * as React from 'react';
-import { State } from '../../../state/state';
-import { getState, updateState } from 'hyperwrap';
-
-interface Props {
-    state?: State;
-}
-
-export const Home = (
-    {state, actions}: Props = {
-        state: getState()
-    }
-) => {
-    const _state = state || getState();
-
-    const changeThing = (e: any, thing: string) => { updateState('thing', thing); };
-
-    return (
-        <div>
-            <p>{_state.thing}</p>
-            <button onClick={(e) => {changeThing(e, 'bob')} }>push</button>
-        </div>
-    );
-};
-
-```
-
-> Note the use of _state. We do this because typescript thinks that state may be undefined. `const _state = state || getState()` ensures that typescript knows that _state is definately not undefined.
-
-# Update State
-
-To update state, specify the node in the state object to update, followed by the value.
-
-```javascript
-
-updateState('deep/nested/thing', newValue);
-
-```
-
-*Adding nodes* - Use the above. If parent nodes aren't created yet, they will be created for you.
-
-*Deleting nodes* - Make the newValue undefined. Any parent node clean up will also be taken care of.
-
-# Actions
-
-Actions are just functions in hyperwrap.  
-Treat them sensibly (make them DRY, stored in a sensible place, and import as necessary).
-
-Below we've moved `changeThing` out to it's own module.  
-We import it and inject it into the props (like state).  
-This makes it pure and easy to test...
-
 ```javascript
 
 import * as React from 'react';
@@ -138,7 +82,6 @@ import { State } from '../../../state/state';
 import { Actions } from '../../../actions/actions';
 import { getState } from 'hyperwrap';
 import { changeThing } from './change-thing.function';
-
 
 interface Props {
     state?: State;
@@ -166,3 +109,17 @@ export const Home = (
 };
 
 ```
+
+# Update State
+
+To update state, specify the node in the state object to update, followed by the value.
+
+```javascript
+
+updateState('deep/nested/thing', newValue);
+
+```
+
+*Adding nodes* - Use the above. If parent nodes aren't created yet, they will be created for you.
+
+*Deleting nodes* - Make the newValue undefined. Any parent node clean up will also be taken care of.
