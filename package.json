@@ -1,0 +1,23 @@
+{
+  "name": "hyperwrap",
+  "version": "1.0.3",
+  "description": "Makes React simple and functional",
+  "main": "index.tsx",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "react",
+    "hyperapp",
+    "functional",
+    "simple",
+    "global",
+    "hyperwrap"
+  ],
+  "author": "attack-monkey",
+  "license": "MIT",
+  "dependencies": {
+    "iu-ts": "^1.0.0",
+    "react-dom": "^16.6.3"
+  }
+}
