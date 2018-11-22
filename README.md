@@ -75,6 +75,12 @@ export const Home = () => {
 
 # Making the above pure and testable
 
+Below we are able to inject both state and actions.
+
+This allows us to test against different state configurations.
+
+We are also able to inject stub actions for isolated component testing. 
+
 ```javascript
 
 import * as React from 'react';
