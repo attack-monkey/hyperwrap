@@ -35,6 +35,9 @@ npm start
 
 # Basics
 
+Hyperwrap is an app function that wraps around React.  
+When Hyperwrap's state changes - it rerenders React.
+
 A typical entry index.tsx looks like...
 
 ```javascript
@@ -51,6 +54,11 @@ app(initialState, View, document.getElementById('app'));
 > View is just a plain React functional component
 
 # Get and Update State (Basics)
+
+In Hyperwrap, actions are just functions.  
+Those functions can change global state, which in turn rerenders the application.
+
+> Remember - in Hyperwrapp, state is global.
 
 `getState()` gets global state and `updateState()` updates it...
 
@@ -75,11 +83,22 @@ export const Home = () => {
 
 # Making the above pure and testable
 
-Below we are able to inject both state and actions.
+We've changed the above code, so we can inject both state and actions into the functional component.
 
-This allows us to test against different state configurations.
+This makes the component pure, and easier to test.
 
-We are also able to inject stub actions for isolated component testing. 
+Note that the function `changeThing` has also been moved out to it's own module.  
+We then assign changeThing to an `actionsCollection`, which we inject in as `actions`.
+
+> Since typescript thinks that `state` and `actions` may be undefined, we include the lines ...
+```
+...
+const _state = state || getState();
+const _actions = actions || actionsCollection;
+...
+```
+> This ensures that `_state` and `_actions` are definitely NOT undefined.  
+> We then use `_state` and `_actions` throughout the component.
 
 ```javascript
 
@@ -116,7 +135,7 @@ export const Home = (
 
 ```
 
-# Update State
+# Updating State (Advanced)
 
 To update state, specify the node in the state object to update, followed by the value.
 
@@ -129,3 +148,44 @@ updateState('deep/nested/thing', newValue);
 *Adding nodes* - Use the above. If parent nodes aren't created yet, they will be created for you.
 
 *Deleting nodes* - Make the newValue undefined. Any parent node clean up will also be taken care of.
+
+## Updating without rerendering
+
+By default hyperwrap will rerender your React app on state change.
+
+If however you are making multiple state changes at once - this is not ideal.
+
+Instead pass the  `{ rerender: false }` flag to stop the app from rerendering...
+
+```javascript
+
+updateState('deep/nested/thing', newValue, {rerender: false});
+
+```
+
+## Updating multiple nodes at once
+
+The following can be used to update multiple state nodes, before re-rendering...
+
+```javascript
+
+updateMulti([
+  { node: 'deep/nested/thing', updateValue: newValue1 },
+  { node: 'another/deep/nested/thing', updateValue: newValue2 }
+]);
+
+```
+Again, if you don't want to rerender after the state updates - pass the `{ rerender: false }` flag.
+
+e.g.
+
+```javascript
+
+updateMulti([
+  { node: 'deep/nested/thing', updateValue: newValue1 },
+  { node: 'another/deep/nested/thing', updateValue: newValue2 }
+], {
+  rerender: false
+});
+
+```
