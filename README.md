@@ -1,12 +1,12 @@
 # Meet hyperwrap
 
-Hyperwrap embodies the principles of hyperapp and transfers them to react, turning react into a simple to use functional framework.
+Hyperwrap embodies the principles of hyperapp and transfers them to react, turning react into a simple to use **functional framework**.
 
 # A few notes
 
 - Hyperwrap is written in typescript
 - In Hyperwrap there is no local state and no class components to worry about.
-- Immutable state changes are simple - even with a deeply nested object.
+- Global state changes are simple - even with a deeply nested object.
 
 # Install
 
@@ -35,7 +35,7 @@ npm start
 
 # Basics
 
-Hyperwrap is an app function that wraps around React.  
+Hyperwrap is an `app` function that wraps around React.  
 When Hyperwrap's state changes - it rerenders React.
 
 A typical entry index.tsx looks like...
@@ -53,12 +53,28 @@ app(initialState, View, document.getElementById('app'));
 > initialState is just a plain js object.  
 > View is just a plain React functional component
 
+### Flow
+
+In Hyperwrapp, state is global.
+
+Global state is changed by **actions**, triggered by an event (e.g mouse click).
+
+**actions** are just functions - there is nothing fancy about them, except they use `updateState()` to update the Global state and rerender the View.
+
+The basic flow looks like...
+
+```
+
+application at rest => event => action => state change => re-render => application at rest
+
+```
+
+> Note: State changes don't have to rerender the View (We'll cover that a little later)
+
+**Async operations** use the same flow. Remember - any time the state changes, the View rerenders (unless you don't want it to).
+
+
 # Get and Update State (Basics)
-
-In Hyperwrap, actions are just functions.  
-Those functions can change global state, which in turn rerenders the application.
-
-> Remember - in Hyperwrapp, state is global.
 
 `getState()` gets global state and `updateState()` updates it...
 
@@ -87,10 +103,11 @@ We've changed the above code, so we can inject both state and actions into the f
 
 This makes the component pure, and easier to test.
 
-Note that the function `changeThing` has also been moved out to it's own module.  
-We then assign changeThing to an `actionsCollection`, which we inject in as `actions`.
+Note that the function `changeThing` has also been moved out to it's own module, since we usually want to decouple actions from component views.  
+We assign `changeThing` to an `actionsCollection`, which we inject into the component as `actions`.
 
 > Since typescript thinks that `state` and `actions` may be undefined, we include the lines ...
+
 ```
 ...
 const _state = state || getState();
@@ -108,11 +125,14 @@ import { Actions } from '../../../actions/actions';
 import { getState } from 'hyperwrap';
 import { changeThing } from './change-thing.function';
 
+// This is a typescript interface, which defines the expected data that our props will be.
+// State and Actions are interfaces in their own right - but belong in their own separate modules.
 interface Props {
     state?: State;
     actions?: Actions;
 }
 
+// actionsCollection pulls in actions from other modules, ready for injection into our component.
 const actionsCollection = {
     changeThing: changeThing
 }
@@ -145,15 +165,15 @@ updateState('deep/nested/thing', newValue);
 
 ```
 
-*Adding nodes* - Use the above. If parent nodes aren't created yet, they will be created for you.
+**Adding nodes** - Use the above. If parent nodes aren't created yet, they will be created for you.
 
-*Deleting nodes* - Make the newValue undefined. Any parent node clean up will also be taken care of.
+**Deleting nodes** - Make the `newValue` undefined. Any parent nodes will also be removed if they do not have children.
 
 ## Updating without rerendering
 
 By default hyperwrap will rerender your React app on state change.
 
-If however you are making multiple state changes at once - this is not ideal.
+There will be times however where this is not ideal.
 
 Instead pass the  `{ rerender: false }` flag to stop the app from rerendering...
 
