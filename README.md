@@ -61,17 +61,18 @@ Global state is changed by **actions**, triggered by an event (e.g mouse click).
 
 **actions** are just functions - there is nothing fancy about them, except they use `updateState()` to update the Global state and rerender the View.
 
+**Async operations** are really no different.
+
+
 The basic flow looks like...
 
 ```
 
-application at rest => event => action => state change => re-render => application at rest
+application at rest => event => action => state change => re-render => application at rest again
 
 ```
 
 > Note: State changes don't have to rerender the View (We'll cover that a little later)
-
-**Async operations** use the same flow. Remember - any time the state changes, the View rerenders (unless you don't want it to).
 
 
 # Get and Update State (Basics)
