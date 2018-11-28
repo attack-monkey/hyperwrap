@@ -1,12 +1,12 @@
 # Meet hyperwrap
 
-Hyperwrap embodies the principles of hyperapp and transfers them to react, turning react into a simple to use **functional framework**.
+Hyperwrap (inspired by hyperapp) turns react into a simple to use **functional framework**.
 
 # A few notes
 
-- Hyperwrap is written in typescript
 - In Hyperwrap there is no local state and no class components to worry about.
-- Global state changes are simple - even with a deeply nested object.
+- Hyperwrap makes global state management simple.
+- Hyperwrap is written in **typescript**.
 
 # Install
 
@@ -53,31 +53,18 @@ app(initialState, View, document.getElementById('app'));
 > initialState is just a plain js object.  
 > View is just a plain React functional component
 
-### Flow
-
-In Hyperwrapp, state is global.
-
-Global state is changed by **actions**, triggered by an event (e.g mouse click).
-
-**actions** are just functions - there is nothing fancy about them, except they use `updateState()` to update the Global state and rerender the View.
-
-**Async operations** are really no different.
-
-
-The basic flow looks like...
+Let's say our initialState is ...
 
 ```
 
-application at rest => event => action => state change => re-render => application at rest again
+{
+    thing: 'not bob',
+    anotherThing: 'something else'
+}
 
 ```
 
-> Note: State changes don't have to rerender the View (We'll cover that a little later)
-
-
-# Get and Update State (Basics)
-
-`getState()` gets global state and `updateState()` updates it...
+The following component illustrates how to interact with state using `getState` and `updateState`...
 
 ```javascript
 
@@ -98,58 +85,38 @@ export const Home = () => {
 
 ```
 
+> Note that even though we update `state.thing` to 'bob', `state.anotherThing` remains unaffected.
+
 # Making the above pure and testable
 
-We've changed the above code, so we can inject both state and actions into the functional component.
+- We've moved `changeThing` to it's own module
+- We've made `state` and `actions` as optional props to our functional component.
+- We've set default values for `state` and `actions`.
 
-This makes the component pure, and easier to test.
-
-Note that the function `changeThing` has also been moved out to it's own module, since we usually want to decouple actions from component views.  
-We assign `changeThing` to an `actionsCollection`, which we inject into the component as `actions`.
-
-> Since typescript thinks that `state` and `actions` may be undefined, we include the lines ...
-
-```
-...
-const _state = state || getState();
-const _actions = actions || actionsCollection;
-...
-```
-> This ensures that `_state` and `_actions` are definitely NOT undefined.  
-> We then use `_state` and `_actions` throughout the component.
+_This lets us to inject mock values for state and actions, for easier testing + now it's a pure function_
 
 ```javascript
 
 import * as React from 'react';
 import { State } from '../../../state/state';
-import { Actions } from '../../../actions/actions';
 import { getState } from 'hyperwrap';
 import { changeThing } from './change-thing.function';
 
-// This is a typescript interface, which defines the expected data that our props will be.
-// State and Actions are interfaces in their own right - but belong in their own separate modules.
+
 interface Props {
     state?: State;
-    actions?: Actions;
+    actions?: { [key: string]: any }
 }
 
-// actionsCollection pulls in actions from other modules, ready for injection into our component.
 const actionsCollection = {
     changeThing: changeThing
 }
 
-export const Home = (
-    {state, actions}: Props = {
-        state: getState(),
-        actions: actionsCollection
-    }
-) => {
-    const _state = state || getState();
-    const _actions = actions || actionsCollection;
+export const Home = ({state, actions}: Props = { state: getState(), actions: actionsCollection } ) => {
     return (
         <div>
-            <p>{_state.thing}</p>
-            <button onClick={(e) => {_actions.changeThing(e, 'bob')} }>push</button>
+            <p>{state!.thing}</p>
+            <button onClick={(e) => {actions!.changeThing(e, 'bob')} }>push</button>
         </div>
     );
 };
@@ -172,7 +139,7 @@ updateState('deep/nested/thing', newValue);
 
 ## Updating without rerendering
 
-By default hyperwrap will rerender your React app on state change.
+By default hyperwrap rerenders an app on state change.
 
 There will be times however where this is not ideal.
 
