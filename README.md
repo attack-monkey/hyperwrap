@@ -107,16 +107,23 @@ interface Props {
     state?: State;
     actions?: { [key: string]: any }
 }
-
+ 
 const actionsCollection = {
     changeThing: changeThing
 }
-
-export const Home = ({state, actions}: Props = { state: getState(), actions: actionsCollection } ) => {
+ 
+export const Home = (
+    {state, actions}: Props = {
+        state: getState(),
+        actions: actionsCollection
+    }
+) => {
+    const _state = state || getState();
+    const _actions = actions || actionsCollection;
     return (
         <div>
-            <p>{state!.thing}</p>
-            <button onClick={(e) => {actions!.changeThing(e, 'bob')} }>push</button>
+            <p>{_state.thing}</p>
+            <button onClick={(e) => {_actions.changeThing(e, 'bob')} }>push</button>
         </div>
     );
 };
